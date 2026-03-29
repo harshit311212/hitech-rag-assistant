@@ -61,7 +61,7 @@ Answer (cite the relevant section if found):""",
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
-def _get_embeddings() -> HuggingFaceEmbeddings:
+def _get_embeddings():
     """Return a cached HuggingFace embedding model."""
     return HuggingFaceEmbeddings(
         model_name=EMBED_MODEL,
@@ -70,7 +70,7 @@ def _get_embeddings() -> HuggingFaceEmbeddings:
     )
 
 
-def _load_and_split_pdf() -> list:
+def _load_and_split_pdf():
     """Load the HITECH PDF and split into chunks."""
     loader = PyPDFLoader(str(PDF_PATH))
     docs = loader.load()
@@ -82,7 +82,7 @@ def _load_and_split_pdf() -> list:
     return splitter.split_documents(docs)
 
 
-def _build_or_load_faiss(embeddings: HuggingFaceEmbeddings) -> FAISS:
+def _build_or_load_faiss(embeddings):
     """Build FAISS index from PDF, or load existing one from disk."""
     if INDEX_DIR.exists() and any(INDEX_DIR.iterdir()):
         return FAISS.load_local(
@@ -98,15 +98,8 @@ def _build_or_load_faiss(embeddings: HuggingFaceEmbeddings) -> FAISS:
 
 
 # ── Public API ─────────────────────────────────────────────────────────────────
-def build_rag_chain(api_key: str | None = None) -> RetrievalQA:
-    """
-    Build and return the full RAG chain.
-
-    Parameters
-    ----------
-    api_key : str | None
-        Groq API key. Falls back to GROQ_API_KEY env var.
-    """
+def build_rag_chain(api_key=None):
+    """Build and return the full RAG chain."""
     groq_key = api_key or os.getenv("GROQ_API_KEY", "")
     if not groq_key:
         raise ValueError(
@@ -137,12 +130,8 @@ def build_rag_chain(api_key: str | None = None) -> RetrievalQA:
     return chain
 
 
-def get_source_chunks(query: str, api_key: str | None = None) -> list[dict]:
-    """
-    Return the top-k retrieved chunks for a query (for citation cards).
-
-    Returns a list of dicts: {text, page, score_preview}
-    """
+def get_source_chunks(query, api_key=None):
+    """Return the top-k retrieved chunks for a citation cards."""
     embeddings = _get_embeddings()
     vectorstore = _build_or_load_faiss(embeddings)
 
