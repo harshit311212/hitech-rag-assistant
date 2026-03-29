@@ -107,7 +107,7 @@ def _build_or_load_faiss(embeddings):
 # ── Public API ─────────────────────────────────────────────────────────────────
 def build_rag_chain(api_key=None):
     """Build and return the full RAG chain."""
-    groq_key = api_key or os.getenv("GROQ_API_KEY", "")
+    groq_key = (api_key or os.getenv("GROQ_API_KEY", "")).strip()
     if not groq_key:
         raise ValueError(
             "Groq API key is required. Set GROQ_API_KEY env var or pass api_key."
