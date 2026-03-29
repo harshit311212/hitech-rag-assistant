@@ -13,6 +13,12 @@ Uses:
 from __future__ import annotations
 
 import os
+
+# STRICT OFFLINE MODE: Force HuggingFace to absolutely never make outbound requests
+# (This isolates whether 'Connection error' is Groq or HuggingFace)
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+
 from pathlib import Path
 
 from dotenv import load_dotenv

@@ -564,7 +564,9 @@ if submit and user_input.strip():
             answer = result.get("result", "No answer generated.")
             sources = get_source_chunks(query, api_key=st.session_state.api_key)
         except Exception as e:
-            answer = f"⚠️ Error: {e}"
+            import traceback
+            tb = traceback.format_exc()
+            answer = f"⚠️ Error Type: {repr(e)}\n\nDetails: {tb}"
             sources = []
 
     # Append AI message
