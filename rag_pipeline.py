@@ -16,13 +16,14 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
 
 load_dotenv()
 
@@ -120,14 +121,24 @@ def build_rag_chain(api_key=None):
         search_kwargs={"k": RETRIEVER_K},
     )
 
-    chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": SYSTEM_PROMPT},
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    core_chain = (
+        {
+            "context": lambda x: format_docs(retriever.invoke(x["query"])),
+            "question": lambda x: x["query"]
+        }
+        | SYSTEM_PROMPT
+        | llm
+        | StrOutputParser()
     )
-    return chain
+
+    # Return dict format to seamlessly integrate with app.py expecting RetrievalQA output
+    def wrapped_invoke(inputs):
+        return {"result": core_chain.invoke(inputs)}
+        
+    return RunnableLambda(wrapped_invoke)
 
 
 def get_source_chunks(query, api_key=None):
