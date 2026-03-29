@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+
+# Vector database
+faiss_index/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Streamlit config (optional)
+.streamlit/
